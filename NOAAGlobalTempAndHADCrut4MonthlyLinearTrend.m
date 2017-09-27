@@ -141,7 +141,7 @@ dataName='NOAAGlobalAndHADCrut4';
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % First find kd = rd/ro where rd = effective distance in years %
-    % between the datasets, equation (3.7).                        %
+    % between the datasets, equation (4.7).                        %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     m=0;
     sumSameTrds=0;
@@ -154,13 +154,13 @@ dataName='NOAAGlobalAndHADCrut4';
     end
     variance=residStdErrOLS^2;
     kd=-log(1-sumSameTrds/(2*m*variance));
-    disp(['kd = rd/ro = ',num2str(kd),' = (dataset distance)/ro - see (3.7)']);
+    disp(['kd = rd/ro = ',num2str(kd),' = (dataset distance)/ro - see (4.7)']);
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Now find the sum of squares of residual differences from the closest %
     % residual (by time difference) in the SAME dataset, inverse distance  %
-    % weighted and divided by 2, to give RHS of (3.8).                     %
+    % weighted and divided by 2, to give RHS of (4.8).                     %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     gammaRHSidw=0;
     for i=3:n
@@ -175,7 +175,7 @@ dataName='NOAAGlobalAndHADCrut4';
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.8) <= RHS of (3.8) %
+    % Now find ro by incrementing it until LHS of (4.8) <= RHS of (4.8) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     gammaLHSidw=2*gammaRHSidw;
@@ -193,7 +193,7 @@ dataName='NOAAGlobalAndHADCrut4';
         gammaLHSidw=gammaLHSidw*variance;
     end
     rd=kd*ro;
-    disp('Durbin-Watson equivalent estimate (3.8):');
+    disp('Durbin-Watson equivalent estimate (4.8):');
     disp(['RBF time ro = ',num2str(ro),' years,  dataset rd = ',num2str(rd),' years']);
 
 
@@ -240,7 +240,7 @@ dataName='NOAAGlobalAndHADCrut4';
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.9) <= RHS of (3.9) %
+    % Now find ro by incrementing it until LHS of (4.9) <= RHS of (4.9) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     LHSmultiplier=variance*(2-exp(-SSPD/SSR));
@@ -259,7 +259,7 @@ dataName='NOAAGlobalAndHADCrut4';
         gammaLHSidw=gammaLHSidw*LHSmultiplier;
     end
     rd=kd*ro;
-    disp('Modified Durbin-Watson equivalent estimate (3.9):');
+    disp('Modified Durbin-Watson equivalent estimate (4.9):');
     disp(['RBF time ro = ',num2str(ro),' years,  dataset rd = ',num2str(rd),' years']);
 
     disp('--------------------------------------------------------');

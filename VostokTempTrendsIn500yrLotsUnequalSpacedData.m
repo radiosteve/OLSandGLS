@@ -3,7 +3,7 @@
 % and GLS for a linear (y = b0 + b1.t) model.                            %
 % This code is for Matlab or Octave (clear or set the usingOctave flag). %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-usingOctave=true;
+usingOctave=false;
 
 % Read data as csv numeric file of two columns: year (AD) and reconstructed temperature anomaly (K)
 % This file is from data at https://www1.ncdc.noaa.gov/pub/data/paleo/icecore/antarctica/antarctica-temp2006.txt
@@ -264,7 +264,7 @@ for lot=1:22
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % First find kd = rd/ro where rd = effective distance %
-    % between the datasets, equation (3.7).               %
+    % between the datasets, equation (4.7).               %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     m=0;
     sumSameTrds=0;
@@ -291,7 +291,7 @@ for lot=1:22
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Now find the sum of squares of residual differences from the closest %
     % residual (by time difference) in the SAME dataset, UNWEIGHTED        %
-    % and divided by 2, to give RHS of (3.8).                              %
+    % and divided by 2, to give RHS of (4.8).                              %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     gammaRHSidw=0;
     rClosest=0;
@@ -314,7 +314,7 @@ for lot=1:22
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.8) <= RHS of (3.8) %
+    % Now find ro by incrementing it until LHS of (4.8) <= RHS of (4.8) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     gammaLHSidw=2*gammaRHSidw;
@@ -385,7 +385,7 @@ for lot=1:22
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.9) <= RHS of (3.9) %
+    % Now find ro by incrementing it until LHS of (4.9) <= RHS of (4.9) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     LHSmultiplier=variance*(2-exp(-SSPD/SSR));

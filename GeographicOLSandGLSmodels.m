@@ -3,7 +3,7 @@
 % GLS assumes residual correlation is by geographic exponential radial basis functions. % 
 % This code is for Matlab or Octave (clear or set the usingOctave flag).                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-usingOctave=true; % forces flushing of the display buffer in Octave to see progress (not for Matlab)
+usingOctave=false; % forces flushing of the display buffer in Octave to see progress (not for Matlab)
 
 % Read data:
 multipath=csvread('Multipath.csv');
@@ -111,7 +111,7 @@ var=10; % v1
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % First find kd = rd/ro where rd = effective distance %
-    % between the datasets, equation (3.7).               %
+    % between the datasets, equation (4.7).               %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     m=0;
     sumSameTrds=0;
@@ -140,7 +140,7 @@ var=10; % v1
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Now find the sum of squares of residual differences from the closest     %
-    % residual (great circle distance) and divided by 2, to give RHS of (3.8). %
+    % residual (great circle distance) and divided by 2, to give RHS of (4.8). %
     % If there are more than one at the same nearest LOCATION, take the mean.  %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     gammaRHSidw=0;
@@ -188,7 +188,7 @@ var=10; % v1
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.8) <= RHS of (3.8) %
+    % Now find ro by incrementing it until LHS of (4.8) <= RHS of (4.8) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     gammaLHSidw=2*gammaRHSidw;
@@ -264,7 +264,7 @@ var=10; % v1
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.9) <= RHS of (3.9) %
+    % Now find ro by incrementing it until LHS of (4.9) <= RHS of (4.9) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     LHSmultiplier=variance*(2-exp(-SSPD/SSR));

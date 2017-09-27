@@ -5,7 +5,7 @@
 % correlated by a radial basis function of form phi_ij = exp(-r_ij/ro).  %
 % This code is for Matlab or Octave (clear or set the usingOctave flag). %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-usingOctave=true;
+usingOctave=false;
 
 % Petit, J.R., et al., 2001, Vostok Ice Core Data for 420,000 Years, IGBP PAGES/World Data Center 
 % for Paleoclimatology Data Contribution Series #2001-076.
@@ -89,7 +89,7 @@ end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % First find kd = rd/ro where rd = effective distance %
-    % between the datasets, equation (3.7).               %
+    % between the datasets, equation (4.7).               %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     m=0;
     sumSameTrds=0;
@@ -107,7 +107,7 @@ end
         % no zero distance pairs - set kd =0
         kd=0;
     end
-    disp(['kd = rd/ro = ',num2str(kd),' = (dataset distance)/ro - see (3.7)']);
+    disp(['kd = rd/ro = ',num2str(kd),' = (dataset distance)/ro - see (4.7)']);
     
     if usingOctave
         fflush(stdout);
@@ -117,7 +117,7 @@ end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Now find the sum of squares of residual differences from the closest %
     % residual (by time difference) in the SAME dataset, UNWEIGHTED        %
-    % and divided by 2, to give RHS of (3.8).                              %
+    % and divided by 2, to give RHS of (4.8).                              %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     gammaRHSidw=0;
     rClosest=0;
@@ -140,7 +140,7 @@ end
 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.8) <= RHS of (3.8) %
+    % Now find ro by incrementing it until LHS of (4.8) <= RHS of (4.8) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     gammaLHSidw=2*gammaRHSidw;
@@ -154,8 +154,12 @@ end
         gammaLHSidw=gammaLHSidw*variance;
     end
     rd=kd*ro;
-    disp('Durbin-Watson equivalent estimate (3.8):');
-    disp(['RBF time ro = ',num2str(ro),',  dataset rd = ',num2str(rd)]);
+    disp('Durbin-Watson equivalent estimate (4.8):');
+    if kd==0
+        disp(['RBF time ro = ',num2str(ro),',  rd = ',num2str(rd),', so equivalent to (4.5)']);
+    else
+        disp(['RBF time ro = ',num2str(ro),',  dataset rd = ',num2str(rd)]);
+    end
 
 
     disp('--------------------------------------------------------');
@@ -215,7 +219,7 @@ end
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Now find ro by incrementing it until LHS of (3.9) <= RHS of (3.9) %
+    % Now find ro by incrementing it until LHS of (4.9) <= RHS of (4.9) %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ro=0;
     LHSmultiplier=variance*(2-exp(-SSPD/SSR));
@@ -230,8 +234,12 @@ end
         gammaLHSidw=gammaLHSidw*LHSmultiplier;
     end
     rd=kd*ro;
-    disp('Modified Durbin-Watson equivalent estimate (3.9):');
-    disp(['RBF time ro = ',num2str(ro),',  dataset rd = ',num2str(rd)]);
+    disp('Modified Durbin-Watson equivalent estimate (4.9):');
+    if kd==0
+        disp(['RBF time ro = ',num2str(ro),',  rd = ',num2str(rd),', so equivalent to (4.6)']);
+    else
+        disp(['RBF time ro = ',num2str(ro),',  dataset rd = ',num2str(rd)]);
+    end
 
     disp('--------------------------------------------------------');
     

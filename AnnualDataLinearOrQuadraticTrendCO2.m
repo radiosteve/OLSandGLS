@@ -8,7 +8,7 @@ doQuatratic=false;  % otherwise linear fit
 
 plotACF=false;      % plot autocorrelation function of residuals?
 
-plotLongTerm=2;     % plot long-term extrapolated model with 95% conf. int.: 0=no, 1=OLS, 2=ACF GLS, 3=DW GLS, 4=new GLS
+plotLongTerm=4;     % plot long-term extrapolated model with 95% conf. int.: 0=no, 1=OLS, 2=ACF GLS, 3=DW GLS, 4=new GLS
 
 disp('========================================================');
 
@@ -318,6 +318,9 @@ legend('observed','OLS fit',['GLS ACF lag-1 AR1(',num2str(R(2),3),')'],['GLS Dur
 title([num2str(n),' measured data points, and best fit lines, Cape Grim CO_2 annual data']);
 xlabel('Year');
 ylabel('CO_2 Concentration, ppm');
+if plotLongTerm>0.5
+    pause;
+end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
