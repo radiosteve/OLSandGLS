@@ -59,6 +59,18 @@ for i=1:n
     y(i,1)=CH4ppb;
 end
 
+% decorrelate the explanatory variables for accurate prediction intervals
+if modelOrder>1
+    for k=2:modelOrder
+        % remove any correlation between x(:,k+1) and x(:,1:k) by subtracting
+        % an OLS estimate of x(:,k+1) in terms of x(:,1:k)
+        X=x(:,1:k);
+        Y=x(:,k+1);
+        betaDecorr=inv((transpose(X)*X))*transpose(X)*Y;
+        x(:,k+1)=Y-X*betaDecorr;
+    end
+end
+
 [n,k1]=size(x); % k1 = k + 1 = no. of variables + intercept
 k=k1-1;
 % calculate dx = Xi - Xmean
@@ -85,6 +97,12 @@ if modelOrder>1
 end
 
 disp('=========================================================================');
+disp('Data: Atmospheric background methane at Cape Grim');
+disp('from http://www.csiro.au/greenhouse-gases/');
+if modelOrder>1
+    disp('The 2nd and higher order expanatory variables are decorrelated w.r.t. previous variables');
+end
+disp('-------------------------------------------------------------------------');
 disp('OLS calculation by matrix algebra:');
 invXdX=inv(transpose(x)*x);
 betaOLS=invXdX*transpose(x)*y;
@@ -381,14 +399,12 @@ end
     variance=residStdErrOLS^2;
     if m>0
         kd=-log(1-sumSameTrds/(2*m*variance));
-        phi=1-sumSameTrds/(2*m*variance);
-        DF=round(n-k-1-2*m*phi/(1+phi));
     else
         % no zero distance pairs - set kd =0
         kd=0;
         phi=0;
-        DF=n-k-1;
     end
+    DF=n-k-1;
     disp(['kd = rd/ro = ',num2str(kd),' = (same location effective distance)/ro - see (4.7)']);
     
     if usingOctave

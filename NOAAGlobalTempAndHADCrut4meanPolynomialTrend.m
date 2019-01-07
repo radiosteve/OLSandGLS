@@ -117,8 +117,6 @@ end
         end
     end
 
-[n,k1]=size(x); % k1 = k + 1 = no. of variables + intercept
-k=k1-1;
 
 disp('=========================================================================');
 if annualMeans
@@ -127,6 +125,9 @@ if annualMeans
 else
     disp([dataName,' Monthly Temperature Anomaly Data ',num2str(floor(t(1))),'-',num2str(floor(t(n)))]);
     dataName=[dataName,'Monthly'];
+end
+if modelOrder>1
+    disp('The 2nd and higher order expanatory variables are decorrelated w.r.t. previous variables');
 end
 disp('=========================================================================');
 
@@ -145,6 +146,24 @@ if predictYears>0
         end
     end
 end
+
+% decorrelate the explanatory variables for accurate prediction intervals
+if modelOrder>1
+    for k=2:modelOrder
+        % remove any correlation between x(:,k+1) and x(:,1:k) by subtracting
+        % an OLS estimate of x(:,k+1) in terms of x(:,1:k)
+        X=x(:,1:k);
+        Xp=xp(:,1:k);
+        Y=x(:,k+1);
+        Yp=xp(:,k+1);
+        betaDecorr=inv((transpose(X)*X))*transpose(X)*Y;
+        x(:,k+1)=Y-X*betaDecorr;
+        xp(:,k+1)=Yp-Xp*betaDecorr;
+    end
+end
+
+[n,k1]=size(x); % k1 = k + 1 = no. of variables + intercept
+k=k1-1;
  
 % A for SSRFD = z'A.z (see Durbin-Watson II 1951)
 A=2*eye(n);

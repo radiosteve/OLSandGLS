@@ -142,8 +142,6 @@ end
         end
     end
 
-[n,k1]=size(x); % k1 = k + 1 = no. of variables + intercept
-k=k1-1;
 
 disp('=========================================================================');
 if annualMeans
@@ -152,6 +150,9 @@ if annualMeans
 else
     disp([dataName,' Monthly Temperature Anomaly Data ',num2str(floor(t(1))),'-',num2str(floor(t(n/2)))]);
     dataName=[dataName,'Monthly'];
+end
+if modelOrder>1
+    disp('The 2nd and higher order expanatory variables are decorrelated w.r.t. previous variables');
 end
 disp('=========================================================================');
 
@@ -183,6 +184,24 @@ if predictYears>0
     end
 end
 [~,np]=size(tp);
+
+% decorrelate the explanatory variables for accurate prediction intervals
+if modelOrder>1
+    for k=2:modelOrder
+        % remove any correlation between x(:,k+1) and x(:,1:k) by subtracting
+        % an OLS estimate of x(:,k+1) in terms of x(:,1:k)
+        X=x(:,1:k);
+        Xp=xp(:,1:k);
+        Y=x(:,k+1);
+        Yp=xp(:,k+1);
+        betaDecorr=inv((transpose(X)*X))*transpose(X)*Y;
+        x(:,k+1)=Y-X*betaDecorr;
+        xp(:,k+1)=Yp-Xp*betaDecorr;
+    end
+end
+ 
+[n,k1]=size(x); % k1 = k + 1 = no. of variables + intercept
+k=k1-1;
  
 
 
@@ -450,13 +469,11 @@ end
     variance=residStdErrOLS^2;
     if m>0
         kd=-log(1-sumSameTrds/(2*m*variance));
-        phi=1-sumSameTrds/(2*m*variance);
-        DF=round(n-k-1-2*m*phi/(1+phi));
     else
         % no zero distance pairs - set kd =0
         kd=0;
-        DF=n-k-1;
     end
+    DF=n-k-1;
     disp(['kd=rd/ro = ',num2str(kd),', ',num2str(m),' co-located pairs->',num2str(n-k-1),'-',num2str(round(m*exp(-kd))),' = ',num2str(DF),' degrees of freedom']);
     
     if usingOctave

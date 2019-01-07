@@ -18,8 +18,6 @@ multipath=csvread('Multipath.csv'); % 327 links
 
 earthRad=6371; % used in distance calcs
 
-plotBestFit=0; % plot best fit with PI: 0=no, 1=OLS, 2=DW, 3=TADW, 4=DW-TADW extrapolated, 5=semivariogram
-
 doSemivar=true; % do GLS based on semivariogram of OLS residuals
 
 [n,~]=size(multipath);
@@ -51,13 +49,6 @@ end
 
 [n,k1]=size(x); % k1 = k + 1 = no. of variables + intercept
 k=k1-1;
-% calculate dx = Xi - Xmean
-meanX=mean(x);
-meanX(1,1)=0; % except dx(intercept) = 1
-dx=meanX*0;
-for i=1:n
-    dx(i,:)=x(i,:)-meanX;
-end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -336,43 +327,6 @@ if d<d025 || d>d975
     disp(['OLS residual Durbin-Watson: ',num2str(d),' [correl. error or bad model: Pr(>|d-',num2str(Ed,3),'|): ',num2str(1-2*abs(betacdf(d/4,a,b)-0.5)),']']);
 else
     disp(['OLS residual Durbin-Watson: ',num2str(d),' [good: Pr(>|d-',num2str(Ed,3),'|): ',num2str(1-2*abs(betacdf(d/4,a,b)-0.5)),']']);
-
-    bestFitOLS=x*betaOLS;
-    tValue1=tinv(0.975,n-k-1);
-    % predInt is prediction interval based on regression coeff std errors
-    predInt=0;
-    for i=1:n
-        predInt(i,1)=residStdErrOLS^2;
-        for m=1:k+1
-            predInt(i,1)=predInt(i,1)+(stdErrorOLS(m,1)*dx(i,m))^2;
-        end
-        predInt(i,1)=tValue1*sqrt(predInt(i,1));
-    end
-
-    if plotBestFit==1
-        outsideIP=0;
-        for i=1:n
-            if y(i,1)>bestFitOLS(i,1)+predIntAll(i,1) || y(i,1)<bestFitOLS(i,1)-predIntAll(i,1)
-                outsideIP=outsideIP+1;
-            end
-        end
-        plot(t,y,'b.',t,bestFitOLS,'r-',t,bestFitOLS+predInt,'g-',t,bestFitOLS-predInt,'g-');
-        legend('Observed','best fit (OLS)','prediction 97.5%','prediction 2.5%','Location','northwest');
-        title([num2str(n),' measured data points, and best fit, ',dataName,' data  [GLS transformed residual Durbin-Watson: ',num2str(d),',  ',num2str(100*outsideIP/n),'% ouside IP]']);
-        xlabel(varName(2,:));
-        ylabel('A 0.01%, dB');
-        % output to csv
-        CSVoutput=0;
-        for i=1:n
-            CSVoutput(i,1)=t(i);                          % parameter
-            CSVoutput(i,2)=y(i,1);                        % observed data
-            CSVoutput(i,3)=bestFitOLS(i,1);              % predicted value
-            CSVoutput(i,4)=bestFitOLS(i,1)+predInt(i,1); % upper prediction interval
-            CSVoutput(i,5)=bestFitOLS(i,1)-predInt(i,1); % lower prediction interval
-        end
-        csvwrite([dataName,'OLS.csv'],CSVoutput);
-    end
-
 end
 
 disp('-------------------------------------------------------------------------');
@@ -399,14 +353,12 @@ end
     variance=residStdErrOLS^2;
     if m>0
         kd=-log(1-sumSameTrds/(2*m*variance));
-        phi=1-sumSameTrds/(2*m*variance);
-        DF=round(n-k-1-2*m*phi/(1+phi));
     else
         % no zero distance pairs - set kd =0
         kd=0;
         phi=0;
-        DF=n-k-1;
     end
+    DF=n-k-1;
     disp(['kd = rd/ro = ',num2str(kd),' = (same location effective distance)/ro - see (4.7)']);
     
     if usingOctave
@@ -538,43 +490,6 @@ if d<d025 || d>d975
     disp(['Transformed residual Durbin-Watson: ',num2str(d),' [bad model or eq: Pr(>|d-',num2str(Ed,3),'|): ',num2str(1-2*abs(betacdf(d/4,a,b)-0.5)),']']);
 else
     disp(['Transformed residual Durbin-Watson: ',num2str(d),'   [good: Pr(>|d-',num2str(Ed,3),'|): ',num2str(1-2*abs(betacdf(d/4,a,b)-0.5)),']']);
-
-    bestFitGLS=x*betaOLS;
-    tValue1=tinv(0.975,DF);
-    % predInt is prediction interval based on regression coeff std errors
-    predInt=0;
-    for i=1:n
-        predInt(i,1)=residStdErrGLS^2;
-        for m=1:k+1
-            predInt(i,1)=predInt(i,1)+(stdErrorGLS(m,1)*dx(i,m))^2;
-        end
-        predInt(i,1)=tValue1*sqrt(predInt(i,1));
-    end
-
-    if plotBestFit==2
-        outsideIP=0;
-        for i=1:n
-            if y(i,1)>bestFitGLS(i,1)+predInt(i,1) || y(i,1)<bestFitGLS(i,1)-predInt(i,1)
-                outsideIP=outsideIP+1;
-            end
-        end
-        plot(t,y,'b.',t,bestFitGLS,'r-',t,bestFitGLS+predInt,'g-',t,bestFitGLS-predInt,'g-');
-        legend('Observed','best fit GLS DW','prediction 97.5%','prediction 2.5%','Location','northwest');
-        title([num2str(n),' measured data points, and best fit, ',dataName,' data  [GLS transformed residual Durbin-Watson: ',num2str(d),',  ',num2str(100*outsideIP/n),'% ouside IP]']);
-        xlabel(varName(2,:));
-        ylabel('A 0.01%, dB');
-        % output to csv
-        CSVoutput=0;
-        for i=1:n
-            CSVoutput(i,1)=t(i);                          % parameter
-            CSVoutput(i,2)=y(i,1);                        % observed data
-            CSVoutput(i,3)=bestFitGLS(i,1);              % predicted value
-            CSVoutput(i,4)=bestFitGLS(i,1)+predInt(i,1); % upper prediction interval
-            CSVoutput(i,5)=bestFitGLS(i,1)-predInt(i,1); % lower prediction interval
-        end
-        csvwrite([dataName,'GLS-DW.csv'],CSVoutput);
-    end
-
 end
 
 
@@ -707,42 +622,6 @@ if d<d025 || d>d975
 else
     disp(['Transformed residual Durbin-Watson: ',num2str(d),'   [good: Pr(>|d-',num2str(Ed,3),'|): ',num2str(1-2*abs(betacdf(d/4,a,b)-0.5)),']']);
 
-    bestFitGLS=x*betaOLS;
-    tValue1=tinv(0.975,DF);
-    % predInt is prediction interval based on regression coeff std errors
-    predInt=0;
-    for i=1:n
-        predInt(i,1)=residStdErrGLS^2;
-        for m=1:k+1
-            predInt(i,1)=predInt(i,1)+(stdErrorGLS(m,1)*dx(i,m))^2;
-        end
-        predInt(i,1)=tValue1*sqrt(predInt(i,1));
-    end
-
-    if plotBestFit==3
-        outsideIP=0;
-        for i=1:n
-            if y(i,1)>bestFitGLS(i,1)+predInt(i,1) || y(i,1)<bestFitGLS(i,1)-predInt(i,1)
-                outsideIP=outsideIP+1;
-            end
-        end
-        plot(t,y,'b.',t,bestFitGLS,'r-',t,bestFitGLS+predInt,'g-',t,bestFitGLS-predInt,'g-');
-        legend('Observed','best fit TADW','prediction 97.5%','prediction 2.5%','Location','northwest');
-        title([num2str(n),' measured data points, and best fit, ',dataName,' data  [GLS transformed residual Durbin-Watson: ',num2str(d),',  ',num2str(100*outsideIP/n),'% ouside IP]']);
-        xlabel(varName(2,:));
-        ylabel('A 0.01%, dB');
-        % output to csv
-        CSVoutput=0;
-        for i=1:n
-            CSVoutput(i,1)=t(i);                          % parameter
-            CSVoutput(i,2)=y(i,1);                        % observed data
-            CSVoutput(i,3)=bestFitGLS(i,1);              % predicted value
-            CSVoutput(i,4)=bestFitGLS(i,1)+predInt(i,1); % upper prediction interval
-            CSVoutput(i,5)=bestFitGLS(i,1)-predInt(i,1); % lower prediction interval
-        end
-        csvwrite([dataName,'GLS-TADW.csv'],CSVoutput);
-    end
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % apply t and Sb extrapolation since d test ok %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -759,42 +638,6 @@ else
     for m=1:k1
         fprintf('%s  %12.6f  %12.6f  %9.3f  %7.0f  %12.6f\n',varName(m,:),betaGLStadw(m,1),stdErrorExtrap(m,1),tValue(m,1),DF,2*(1-tcdf(abs(tValue(m,1)),DF)));
     end
-
-    tValue1=tinv(0.975,DF);
-    % predInt is prediction interval based on regression coeff std errors
-    predInt=0;
-    for i=1:n
-        predInt(i,1)=residStdErrGLS^2;
-        for m=1:k+1
-            predInt(i,1)=predInt(i,1)+(stdErrorExtrap(m,1)*dx(i,m))^2;
-        end
-        predInt(i,1)=tValue1*sqrt(predInt(i,1));
-    end
-
-    if plotBestFit==4
-        outsideIP=0;
-        for i=1:n
-            if y(i,1)>bestFitGLS(i,1)+predInt(i,1) || y(i,1)<bestFitGLS(i,1)-predInt(i,1)
-                outsideIP=outsideIP+1;
-            end
-        end
-        plot(t,y,'b.',t,bestFitGLS,'r-',t,bestFitGLS+predInt,'g-',t,bestFitGLS-predInt,'g-');
-        legend('Observed','best fit DW-TADW extrap','prediction 97.5%','prediction 2.5%','Location','northwest');
-        title([num2str(n),' measured data points, and best fit, ',dataName,' data  [GLS transformed residual Durbin-Watson: ',num2str(d),',  ',num2str(100*outsideIP/n),'% ouside IP]']);
-        xlabel(varName(2,:));
-        ylabel('A 0.01%, dB');
-        % output to csv
-        CSVoutput=0;
-        for i=1:n
-            CSVoutput(i,1)=t(i);                          % parameter
-            CSVoutput(i,2)=y(i,1);                        % observed data
-            CSVoutput(i,3)=bestFitGLS(i,1);              % predicted value
-            CSVoutput(i,4)=bestFitGLS(i,1)+predInt(i,1); % upper prediction interval
-            CSVoutput(i,5)=bestFitGLS(i,1)-predInt(i,1); % lower prediction interval
-        end
-        csvwrite([dataName,'GLS-DW-TADWextrap.csv'],CSVoutput);
-    end
-
 
 end
 
